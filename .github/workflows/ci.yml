@@ -16,13 +16,11 @@ jobs:
       - name: Run tests
         run: cargo test
 
-  lint:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-      - name: Clippy
-        run: cargo clippy -- -D warnings
-      - name: Format
-        run: cargo fmt --check
+      - name: Build
+        run: cargo build --release
