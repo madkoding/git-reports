@@ -51,6 +51,7 @@ cargo run --release -- --repo /path/to/repo --output report.json
 ## 📊 Métricas
 
 ![CI](https://img.shields.io/github/actions/workflow/status/madkoding/git-reports/ci.yml?label=CI&logo=github)
+[![Version](https://img.shields.io/github/v/release/madkoding/git-reports?logo=github)](https://github.com/madkoding/git-reports/releases) [![Rust](https://img.shields.io/badge/rust-1.70+-DC2626?logo=rust&logoColor=white)](https://www.rust-lang.org)
 ![License](https://img.shields.io/github/license/madkoding/git-reports?logo=github)
 ![Rust](https://img.shields.io/badge/rust-1.70+-DC2626?logo=rust&logoColor=white)
 
