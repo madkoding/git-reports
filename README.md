@@ -1,5 +1,10 @@
 # Git Reports
 
+[![CI](https://img.shields.io/github/actions/workflow/status/madkoding/git-reports/ci.yml?label=CI)](https://github.com/madkoding/git-reports/actions)
+[![Release](https://img.shields.io/github/v/release/madkoding/git-reports?label=Version)](https://github.com/madkoding/git-reports/releases)
+[![Rust](https://img.shields.io/badge/Rust-1.70+-DC2626?logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![License](https://img.shields.io/github/license/madkoding/git-reports?label=License)](https://github.com/madkoding/git-reports/blob/main/LICENSE)
+
 Generador de reportes automatizados para repositorios Git. Análisis de commits, contribuidores y métricas de actividad.
 
 ## 📋 Descripción
