@@ -1,4 +1,5 @@
 use clap::Parser;
+use git_reports::ai::generate_ai_report;
 use git_reports::analysis::{analyze_repo, clone_or_update};
 use git_reports::config::load_config;
 use serde_json;
@@ -72,7 +73,29 @@ fn main() {
                 report.total_commits, profile.email
             );
 
-            profile_reports.push(serde_json::to_value(&report).unwrap());
+            // Análisis de IA (si está configurado en el perfil)
+            let ai_report = match &profile.ai {
+                Some(ai_cfg) => {
+                    eprintln!("  → Generando reporte IA con {} ({})...", ai_cfg.provider, ai_cfg.model);
+                    match generate_ai_report(&report, ai_cfg, &profile.name) {
+                        Ok(r) => {
+                            eprintln!("  ✓ Reporte IA generado");
+                            r.map(|r| serde_json::to_value(r).unwrap())
+                        }
+                        Err(e) => {
+                            eprintln!("  ✗ Error IA: {}", e);
+                            None
+                        }
+                    }
+                }
+                None => None,
+            };
+
+            let mut repo_value = serde_json::to_value(&report).unwrap();
+            if let Some(ai) = ai_report {
+                repo_value["ai_report"] = ai;
+            }
+            profile_reports.push(repo_value);
         }
 
         all_reports.push(serde_json::json!({
