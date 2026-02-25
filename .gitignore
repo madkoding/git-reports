@@ -4,3 +4,6 @@ Cargo.lock
 *.swo
 *~
 .DS_Store
+
+# Configuración local con tokens (no subir al repo)
+config.toml
