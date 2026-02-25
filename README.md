@@ -17,15 +17,15 @@ Git Reports es una herramienta construida en Rust que analiza repositorios Git y
 
 ## 🎯 Estado del Proyecto
 
-**Milestone Actual**: 50% Complete
+**Milestone Actual**: 90% Complete
 
 | Característica | Estado |
 |---------------|--------|
 | Análisis de commits | ✅ |
 | Métricas de contribuidores | ✅ |
-| Exportación de reportes | 🚧 WIP |
-| Configuración multi-perfil (config.toml) | ⏳ Planificado |
-| Soporte providers remotos (GitHub/GitLab/Bitbucket) | ⏳ Planificado |
+| Exportación de reportes (JSON) | ✅ |
+| Configuración multi-perfil (config.toml) | ✅ |
+| Soporte providers remotos (GitHub/GitLab/Bitbucket) | ✅ |
 | Visualización web | ⏳ Planificado |
 
 ## 🚀 Inicio Rápido
@@ -45,9 +45,7 @@ cargo build --release
 
 ## ⚙️ Configuración
 
-> **Estado**: ⏳ Planificado — aún no implementado. El diseño de la configuración está definido en [config.toml.example](config.toml.example) como referencia para la implementación futura.
-
-Git Reports trabajará con perfiles: cada uno agrupa un email, un token y una lista de repositorios remotos. Esto permite manejar varias empresas, providers y cuentas desde un único archivo.
+Git Reports trabaja con perfiles: cada uno agrupa un email, un token y una lista de repositorios remotos. Esto permite manejar varias empresas, providers y cuentas desde un único archivo.
 
 ### Archivo de configuración
 
@@ -105,17 +103,21 @@ Ver [config.toml.example](config.toml.example) para un ejemplo completo con todo
 
 ## 🖥️ Uso
 
-> **Estado actual**: solo analiza repositorios locales ya clonados.
-
 ```bash
-cargo run --release -- --repo /path/to/repo --output report.json
+# Analizar con config.toml en el directorio actual
+cargo run --release -- --period week
+
+# Especificar config y guardar resultado en archivo
+cargo run --release -- --config config.toml --period month --output report.json
 ```
 
 | Argumento | Descripción | Default |
 |---|---|---|
-| `--repo` | Ruta local al repositorio | `.` |
-| `--output` | Archivo JSON de salida | — |
+| `--config` | Ruta al archivo de configuración | `config.toml` |
+| `--output` | Archivo JSON de salida (stdout si no se especifica) | — |
 | `--period` | Periodo: `week`, `month`, `all` | `week` |
+
+El reporte JSON resultante contiene un array de perfiles, cada uno con sus repos y los commits encontrados para ese email en el periodo indicado.
 
 ## 🛠️ Stack Tecnológico
 
