@@ -1,0 +1,75 @@
+# Git Reports - Configuración de ejemplo
+# Copia este archivo como config.toml y ajusta los valores.
+#
+# Cada [[profile]] representa una identidad distinta:
+#   - un correo diferente (trabajo, personal, freelance…)
+#   - un token diferente (por empresa o por provider)
+#
+# Dentro de cada perfil puedes listar todos los repositorios
+# que quieras analizar con esa identidad.
+
+# ─── Perfil 1: empresa A (GitHub) ────────────────────────────────────────────
+[[profile]]
+name    = "empresa-a"
+email   = "yo@empresa-a.com"
+token   = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # GitHub PAT de empresa-a
+
+  [[profile.repo]]
+  provider = "github"          # github | gitlab | bitbucket
+  owner    = "empresa-a"
+  name     = "backend-api"
+
+  [[profile.repo]]
+  provider = "github"
+  owner    = "empresa-a"
+  name     = "frontend-app"
+
+# ─── Perfil 2: empresa B (GitLab) ────────────────────────────────────────────
+[[profile]]
+name    = "empresa-b"
+email   = "yo@empresa-b.com"
+token   = "glpat-yyyyyyyyyyyyyyyyyyyy"                   # GitLab PAT de empresa-b
+
+  [[profile.repo]]
+  provider = "gitlab"
+  owner    = "empresa-b"
+  name     = "infra-scripts"
+
+  [[profile.repo]]
+  provider = "gitlab"
+  owner    = "empresa-b"
+  name     = "data-pipelines"
+
+# ─── Perfil 3: freelance — mismo correo, distintos providers ─────────────────
+# Puedes repetir el mismo email en varios perfiles si cada provider
+# requiere su propio token (un PAT de GitHub y otro de Bitbucket, por ejemplo).
+[[profile]]
+name    = "freelance-github"
+email   = "freelance@gmail.com"
+token   = "ghp_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"  # GitHub token personal
+
+  [[profile.repo]]
+  provider = "github"
+  owner    = "mi-usuario"
+  name     = "proyecto-cliente-x"
+
+[[profile]]
+name    = "freelance-bitbucket"
+email   = "freelance@gmail.com"
+token   = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"              # Bitbucket App Password
+
+  [[profile.repo]]
+  provider = "bitbucket"
+  owner    = "mi-usuario"
+  name     = "proyecto-cliente-y"
+
+# ─── Perfil 4: personal ───────────────────────────────────────────────────────
+[[profile]]
+name    = "personal"
+email   = "personal@gmail.com"
+token   = "ghp_pppppppppppppppppppppppppppppppppppppppp"
+
+  [[profile.repo]]
+  provider = "github"
+  owner    = "mi-usuario"
+  name     = "side-project"
