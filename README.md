@@ -17,7 +17,7 @@ Git Reports es una herramienta construida en Rust que analiza repositorios Git y
 
 ## 🎯 Estado del Proyecto
 
-**Milestone Actual**: 90% Complete
+**Milestone Actual**: 95% Complete
 
 | Característica | Estado |
 |---------------|--------|
@@ -26,6 +26,7 @@ Git Reports es una herramienta construida en Rust que analiza repositorios Git y
 | Exportación de reportes (JSON) | ✅ |
 | Configuración multi-perfil (config.toml) | ✅ |
 | Soporte providers remotos (GitHub/GitLab/Bitbucket) | ✅ |
+| Interpretación IA de commits (OpenAI/Anthropic/Ollama) | ✅ |
 | Visualización web | ⏳ Planificado |
 
 ## 🚀 Inicio Rápido
@@ -100,6 +101,44 @@ token = "glpat-..."        # GitLab PAT de empresa-b
 Ver [config.toml.example](config.toml.example) para un ejemplo completo con todos los casos.
 
 > ⚠️ Agrega `config.toml` a tu `.gitignore` para no exponer tokens.
+
+### Configuración de IA
+
+Cada perfil puede tener una sección `[profile.ai]` opcional. Si se omite, el reporte solo contendrá estadísticas de commits.
+
+```toml
+[[profile]]
+name  = "trabajo"
+email = "yo@empresa.com"
+token = "ghp_..."
+
+  [profile.ai]
+  provider = "openai"           # openai | anthropic | ollama
+  api_key  = "sk-..."           # API Key del provider
+  model    = "gpt-4o"           # modelo a usar
+  # base_url = "http://localhost:11434"  # solo para ollama
+```
+
+| Provider | Modelos recomendados | Requiere |
+|---|---|---|
+| `openai` | `gpt-4o`, `gpt-4o-mini` | API Key de OpenAI |
+| `anthropic` | `claude-3-5-sonnet-20241022` | API Key de Anthropic |
+| `ollama` | `llama3`, `mistral` | Ollama corriendo localmente |
+
+Con IA activada, el JSON de salida incluye un campo `ai_report` por repo:
+
+```json
+{
+  "ai_report": {
+    "summary": "Esta semana implementé autenticación JWT y refactorizé el módulo de pagos.",
+    "report_markdown": "## Reporte de actividad\n\n...",
+    "hours_by_area": {
+      "backend": 12.0,
+      "testing": 3.5
+    }
+  }
+}
+```
 
 ## 🖥️ Uso
 
