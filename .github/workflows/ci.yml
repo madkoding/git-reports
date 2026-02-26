@@ -96,7 +96,7 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Build release
-        run: cargo build --release --locked
+        run: cargo build --release
 
       - name: Create package
         run: |
