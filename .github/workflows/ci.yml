@@ -1,26 +1,180 @@
-name: CI
+name: CI & Release
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
-    branches: [main, develop]
+    branches: [main]
+
+env:
+  RUST_VERSION: stable
+  CARGO_TERM_COLOR: always
 
 jobs:
-  test:
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # LINT
+  # ═══════════════════════════════════════════════════════════════════════════════
+  fmt:
+    name: Format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-      - name: Run tests
-        run: cargo test
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --all -- --check
 
-  build:
+  clippy:
+    name: Clippy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # TEST
+  # ═══════════════════════════════════════════════════════════════════════════════
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run tests
+        run: cargo test --all-features
+
+  security:
+    name: Security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run security audit
+        uses: rustsec/audit-check@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # BUILD
+  # ═══════════════════════════════════════════════════════════════════════════════
+  build:
+    name: Build (${{ matrix.target }})
+    needs: [fmt, clippy, test, security]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            binary: git-reports
+            ext: ''
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            binary: git-reports
+            ext: ''
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            binary: git-reports
+            ext: ''
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            binary: git-reports.exe
+            ext: .exe
+
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-      - name: Build
-        run: cargo build --release
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build release
+        run: cargo build --release --locked
+
+      - name: Create package
+        run: |
+          mkdir -p release
+          cp target/release/${{ matrix.binary }} release/${{ matrix.binary }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.binary }}-${{ matrix.target }}
+          path: release/${{ matrix.binary }}
+          retention-days: 5
+
+  # ═══════════════════════════════════════════════════════════════════════════════
+  # RELEASE
+  # ═══════════════════════════════════════════════════════════════════════════════
+  release:
+    name: Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: '*'
+          merge-multiple: true
+
+      - name: Generate checksum
+        run: |
+          cd artifacts
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Determine version
+        id: version
+        run: |
+          VERSION="v1.0.$(date +%Y%m%d%H%M%S)"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Creating release: $VERSION"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/*
+          body: |
+            ## 📦 Executables
+
+            Download the executable for your platform:
+
+            | Platform | File |
+            |----------|------|
+            | Linux x64 | `git-reports-x86_64-unknown-linux-gnu` |
+            | Linux ARM64 | `git-reports-aarch64-unknown-linux-gnu` |
+            | macOS x64 | `git-reports-x86_64-apple-darwin` |
+            | Windows x64 | `git-reports.exe` |
+
+            ## 🔒 Checksums
+
+            Verify the integrity of your download:
+
+            ```
+            $(cat artifacts/SHA256SUMS.txt)
+            ```
+
+            ## 🚀 Usage
+
+            ```bash
+            # Create config.yaml in the same directory as the executable
+            ./git-reports
+            ```
+
+            See [README](https://github.com/madkoding/git-reports#readme) for configuration.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

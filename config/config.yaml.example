@@ -1,0 +1,61 @@
+# Config Example (YAML)
+
+# Copy this file as config.yaml and adjust the values.
+
+profiles:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Example 1: Ollama local
+  # ─────────────────────────────────────────────────────────────────────────────
+  - name: "Your Name"
+    email: "your-email@company.com"
+    token: "your-gitlab-token"
+    
+    ai:
+      provider: "ollama"
+      model: "llama3"
+      # base_url: "http://localhost:11434"  # optional, default: http://localhost:11434
+    
+    repos:
+      - provider: "gitlab"
+        owner: "your-org"
+        name: "your-repo"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Example 2: OpenAI
+  # ─────────────────────────────────────────────────────────────────────────────
+  # - name: "Your Name"
+  #   email: "your-email@company.com"
+  #   token: "your-gitlab-token"
+  #   
+  #   ai:
+  #     provider: "openai"
+  #     api_key: "sk-..."
+  #     model: "gpt-4o"
+  #     # base_url: "https://api.openai.com"  # optional, default: https://api.openai.com
+  #   
+  #   repos:
+  #     - provider: "github"
+  #       owner: "your-org"
+  #       name: "your-repo"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Example 3: Custom endpoint (any LLM API compatible with OpenAI format)
+  # ─────────────────────────────────────────────────────────────────────────────
+  # - name: "Your Name"
+  #   email: "your-email@company.com"
+  #   token: "your-gitlab-token"
+  #   
+  #   ai:
+  #     provider: ""  # optional when using custom endpoint
+  #     api_key: "your-api-key"
+  #     model: "your-model"
+  #     endpoint: "https://api.your-provider.com/v1/chat/completions"
+  #     # Or use base_url:
+  #     # base_url: "https://api.your-provider.com"
+  #     # headers:  # optional additional headers
+  #     #   X-Custom-Header: "value"
+  #   
+  #   repos:
+  #     - provider: "gitlab"
+  #       owner: "your-org"
+  #       name: "your-repo"

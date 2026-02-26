@@ -6,4 +6,7 @@ Cargo.lock
 .DS_Store
 
 # Configuración local con tokens (no subir al repo)
+config.yaml
 config.toml
+reporte.md
+reports/

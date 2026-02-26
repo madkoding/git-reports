@@ -5,171 +5,158 @@
 [![Rust](https://img.shields.io/badge/Rust-1.70+-DC2626?logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/github/license/madkoding/git-reports?label=License)](https://github.com/madkoding/git-reports/blob/main/LICENSE)
 
-Generador de reportes automatizados para repositorios Git. Análisis de commits, contribuidores y métricas de actividad.
+Generador de reportes automatizados para repositorios Git con análisis de IA.
 
 ## 📋 Descripción
 
-Git Reports es una herramienta construida en Rust que analiza repositorios Git y genera reportes automatizados con:
-- Estadísticas de commits por periodo
-- Análisis de contribuidores activos
-- Métricas de actividad y patrones
-- Exportación en múltiples formatos
+Git Reports analiza tus commits de Git y genera reportes profesionales en formato Markdown estilo Jira, listos para presentar como parte de tu trabajo.
 
-## 🎯 Estado del Proyecto
+## 🚀 Instalación
 
-**Milestone Actual**: 95% Complete
+### Opción 1: Descargar ejecutable
 
-| Característica | Estado |
-|---------------|--------|
-| Análisis de commits | ✅ |
-| Métricas de contribuidores | ✅ |
-| Exportación de reportes (JSON) | ✅ |
-| Configuración multi-perfil (config.toml) | ✅ |
-| Soporte providers remotos (GitHub/GitLab/Bitbucket) | ✅ |
-| Interpretación IA de commits (OpenAI/Anthropic/Ollama) | ✅ |
-| Visualización web | ⏳ Planificado |
+Descarga el ejecutable para tu sistema operativo desde [Releases](https://github.com/madkoding/git-reports/releases):
 
-## 🚀 Inicio Rápido
+```bash
+# Linux
+wget https://github.com/madkoding/git-reports/releases/latest/download/git-reports-linux-x64
+chmod +x git-reports-linux-x64
+./git-reports-linux-x64
 
-### Prerrequisitos
+# macOS
+curl -L https://github.com/madkoding/git-reports/releases/latest/download/git-reports-macos-x64 -o git-reports
+chmod +x git-reports
+./git-reports
 
-- Rust 1.70+
-- Cargo
+# Windows
+# Descargar desde releases y ejecutar en PowerShell
+.\git-reports-windows-x64.exe
+```
 
-### Instalación
+### Opción 2: Compilar desde código
 
 ```bash
 git clone https://github.com/madkoding/git-reports.git
 cd git-reports
 cargo build --release
+./target/release/git-reports
 ```
 
 ## ⚙️ Configuración
 
-Git Reports trabaja con perfiles: cada uno agrupa un email, un token y una lista de repositorios remotos. Esto permite manejar varias empresas, providers y cuentas desde un único archivo.
+Crea un archivo `config.yaml` en el mismo directorio que el ejecutable:
 
-### Archivo de configuración
-
-```bash
-cp config.toml.example config.toml
+```yaml
+# config.yaml
+profiles:
+  - name: "Tu Nombre"
+    email: "tu@email.com"
+    token: "tu-gitlab-token"
+    
+    # Configuración de IA (opcional)
+    ai:
+      provider: "ollama"      # openai, anthropic, ollama
+      api_key: ""            # no requerido para ollama local
+      model: "llama3"
+      base_url: "http://localhost:11434"
+    
+    repos:
+      - provider: "gitlab"
+        owner: "tu-organizacion"
+        name: "tu-repositorio"
 ```
 
-Estructura de `config.toml`:
+### Parámetros de configuración
 
-```toml
-[[profile]]
-name    = "trabajo"
-email   = "yo@empresa.com"
-token   = "ghp_xxxxxxxxxxxxxxxxxxxx"   # Personal Access Token del provider
+| Campo | Descripción | Obligatorio |
+|-------|-------------|-------------|
+| `profiles[].name` | Nombre del perfil | Sí |
+| `profiles[].email` | Email del desarrollador | Sí |
+| `profiles[].token` | Token de acceso (GitLab PAT, GitHub PAT, etc.) | Sí |
+| `profiles[].ai` | Configuración de IA (opcional) | No |
+| `profiles[].ai.provider` | Provider: `openai`, `anthropic`, `ollama` | Sí* |
+| `profiles[].ai.api_key` | API Key del provider | No |
+| `profiles[].ai.model` | Modelo a usar | Sí* |
+| `profiles[].ai.base_url` | URL base (para Ollama local) | No |
+| `profiles[].repos` | Lista de repositorios | Sí |
+| `repos[].provider` | Provider: `github`, `gitlab`, `bitbucket` | Sí |
+| `repos[].owner` | Owner/namespace del repo | Sí |
+| `repos[].name` | Nombre del repositorio | Sí |
 
-  [[profile.repo]]
-  provider = "github"     # github | gitlab | bitbucket
-  owner    = "mi-empresa"
-  name     = "mi-repo"
-```
+*Solo obligatorio si usas IA
 
-### Múltiples empresas, correos y tokens
+### Providers de IA
 
-Cada `[[profile]]` es una identidad independiente. Puedes tener tantos como necesites:
-
-| Situación | Solución |
-|---|---|
-| Varias empresas | Un perfil por empresa, cada uno con su email y token |
-| Mismo correo en GitHub y Bitbucket | Un perfil por provider, con su propio token |
-| Freelance + trabajo + personal | Un perfil por contexto |
-
-```toml
-[[profile]]
-name  = "empresa-a"
-email = "yo@empresa-a.com"
-token = "ghp_..."          # GitHub PAT de empresa-a
-  [[profile.repo]]
-  provider = "github"
-  owner = "empresa-a"
-  name  = "backend-api"
-
-[[profile]]
-name  = "empresa-b"
-email = "yo@empresa-b.com"
-token = "glpat-..."        # GitLab PAT de empresa-b
-  [[profile.repo]]
-  provider = "gitlab"
-  owner = "empresa-b"
-  name  = "infra-scripts"
-```
-
-Ver [config.toml.example](config.toml.example) para un ejemplo completo con todos los casos.
-
-> ⚠️ Agrega `config.toml` a tu `.gitignore` para no exponer tokens.
-
-### Configuración de IA
-
-Cada perfil puede tener una sección `[profile.ai]` opcional. Si se omite, el reporte solo contendrá estadísticas de commits.
-
-```toml
-[[profile]]
-name  = "trabajo"
-email = "yo@empresa.com"
-token = "ghp_..."
-
-  [profile.ai]
-  provider = "openai"           # openai | anthropic | ollama
-  api_key  = "sk-..."           # API Key del provider
-  model    = "gpt-4o"           # modelo a usar
-  # base_url = "http://localhost:11434"  # solo para ollama
-```
-
-| Provider | Modelos recomendados | Requiere |
-|---|---|---|
-| `openai` | `gpt-4o`, `gpt-4o-mini` | API Key de OpenAI |
-| `anthropic` | `claude-3-5-sonnet-20241022` | API Key de Anthropic |
-| `ollama` | `llama3`, `mistral` | Ollama corriendo localmente |
-
-Con IA activada, el JSON de salida incluye un campo `ai_report` por repo:
-
-```json
-{
-  "ai_report": {
-    "summary": "Esta semana implementé autenticación JWT y refactorizé el módulo de pagos.",
-    "report_markdown": "## Reporte de actividad\n\n...",
-    "hours_by_area": {
-      "backend": 12.0,
-      "testing": 3.5
-    }
-  }
-}
-```
+| Provider | Modelos recomendados | Notas |
+|----------|---------------------|-------|
+| `ollama` | `llama3`, `mistral`, `ministral-3:8b` | Requiere Ollama corriendo localmente |
+| `openai` | `gpt-4o`, `gpt-4o-mini` | Requiere API key de OpenAI |
+| `anthropic` | `claude-3-5-sonnet-20241022` | Requiere API key de Anthropic |
 
 ## 🖥️ Uso
 
 ```bash
-# Analizar con config.toml en el directorio actual
-cargo run --release -- --period week
+# Generar reporte de las últimas 2 semanas (por defecto)
+./git-reports
 
-# Especificar config y guardar resultado en archivo
-cargo run --release -- --config config.toml --period month --output report.json
+# Especificar período
+./git-reports -p week      # última semana
+./git-reports -p 2weeks    # últimas 2 semanas (default)
+./git-reports -p month     # último mes
+./git-reports -p all       # todos los commits
+
+# Especificar config diferente
+./git-reports -c mi-config.yaml
+
+# Cambiar nombre del reporte
+./git-reports -n mi-reporte
 ```
 
-| Argumento | Descripción | Default |
-|---|---|---|
-| `--config` | Ruta al archivo de configuración | `config.toml` |
-| `--output` | Archivo JSON de salida (stdout si no se especifica) | — |
-| `--period` | Periodo: `week`, `month`, `all` | `week` |
+### Opciones del CLI
 
-El reporte JSON resultante contiene un array de perfiles, cada uno con sus repos y los commits encontrados para ese email en el periodo indicado.
+| Opción | Descripción | Default |
+|--------|-------------|---------|
+| `-c, --config` | Archivo de configuración | `config.yaml` |
+| `-o, --output-dir` | Directorio de salida | `reports` |
+| `-n, --name` | Nombre base del reporte | `report` |
+| `-p, --period` | Período: `week`, `2weeks`, `month`, `all` | `2weeks` |
+| `-h, --help` | Mostrar ayuda | - |
 
-## 🛠️ Stack Tecnológico
+### Salida
 
-- **Lenguaje**: Rust
-- **Licencia**: MIT
-- **Tests**: 100% passing
+El ejecutable crea una carpeta `reports/` con:
 
-## 📊 Métricas
+```
+reports/
+├── report_2026-02-12_2026-02-26.json
+└── report_2026-02-12_2026-02-26.md
+```
 
-![CI](https://img.shields.io/github/actions/workflow/status/madkoding/git-reports/ci.yml?label=CI&logo=github)
-[![Version](https://img.shields.io/github/v/release/madkoding/git-reports?logo=github)](https://github.com/madkoding/git-reports/releases) [![Rust](https://img.shields.io/badge/rust-1.70+-DC2626?logo=rust&logoColor=white)](https://www.rust-lang.org)
-![License](https://img.shields.io/github/license/madkoding/git-reports?logo=github)
-![Rust](https://img.shields.io/badge/rust-1.70+-DC2626?logo=rust&logoColor=white)
+- **JSON**: Datos crudos con todos los commits
+- **Markdown**: Reporte formateado estilo Jira con tareas
+
+## 📊 Ejemplo de reporte
+
+El reporte Markdown incluye:
+
+- **Tareas estilo Jira**: Título, descripción, tiempo estimado, tipo, esfuerzo
+- **Resumen por área**: Backend, frontend, testing, etc.
+- **40 horas semanales**: Total distribuido entre tareas
+
+Ver [examples/reporte-ejemplo.md](examples/reporte-ejemplo.md) para un ejemplo completo.
+
+## 🛠️ Desarrollo
+
+```bash
+# Compilar
+cargo build --release
+
+# Tests
+cargo test
+
+# Formato
+cargo fmt --check
+```
 
 ## 📄 Licencia
 
@@ -177,7 +164,4 @@ MIT - Ver [LICENSE](LICENSE) para detalles.
 
 ---
 
-**Authored by**: [madkoding](https://github.com/madkoding)
-
-<!-- AUTO-UPDATE-DATE -->
-**Última actualización:** 2026-02-25 15:24:18 -03
+**Autor**: [madkoding](https://github.com/madkoding)
