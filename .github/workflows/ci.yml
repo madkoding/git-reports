@@ -118,6 +118,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
 
     steps:
       - name: Download all artifacts
