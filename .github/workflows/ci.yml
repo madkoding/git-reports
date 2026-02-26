@@ -53,10 +53,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
       - name: Run security audit
-        uses: rustsec/audit-check@v2.2.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+        run: cargo audit
 
   # ═══════════════════════════════════════════════════════════════════════════════
   # BUILD
